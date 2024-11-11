@@ -9,7 +9,7 @@
 ### Скомпрометированный модуль контроля за собственным жизненым циклом:
 
 | компрометирующее действие | нарушенные цб |
-|-|-|
+|----------|----------|
 | передача ложных логов о своей работе | - |
 | подлог конфигурации | 1, 2, 3, 4 |
 | остановка работы сервиса или непередача конфигурации в обработчик сетевых подключений | 2, 4 |
@@ -19,7 +19,7 @@
 ### Скомпрометированный модуль работы с безопасным хранилищем:
 
 | компрометирующее действие | нарушенные цб |
-|-|-|
+|----------|----------|
 | передача ложных логов о работе ci-inetd сервиса | - |
 | подлог конфигурации | 1, 2, 3, 4 |
 | непередача конфигурации в модуль журналирования | 2, 4 |
@@ -29,7 +29,7 @@
 ### Скомпрометированный модуль журналирования:
 
 | компрометирующее действие | нарушенные цб |
-|-|-|
+|----------|----------|
 | подлог конфигурации | 1, 2, 3, 4 |
 | непередача конфигурации в модуль контроля за собственным жизненным циклом | 2 |
 | подлог журналирования | 4 |
@@ -39,7 +39,7 @@
 ### Скомпрометированный модуль чтения данных конфигурации:
 
 | компрометирующее действие | нарушенные цб |
-|-|-|
+|----------|----------|
 | - | - |
 
 ![4](https://cdn-0.plantuml.com/plantuml/png/VPJDxj9G4CNtVOe9hZKfqFgnC3o3QpP4M918GmJt54H287P9uiB4bTjIALHeuHLctiXpx_LQslXdrHJE_ERCEOJEPDhxEFqq-k2CyHo-7uvxmPGQxWlYdAzya0LVP4jynaiXSvdXUP68kW6VE2O9yRwNKEQSSCe5D1lEYO-SuVlYxYFvmXae5-Zp1lKcD7AfkhDPsubTCU_vYgqRx9EGy9O2U-KRnn9Qy58B2yu0psJDgLtGhF9RzPkEii1eWM4CwiiI0vB805fLGBjkS8MpKpD0VD2py2JBRc03-mnNl_IQM0UG6N2RdhqRzAjq3tHaMLuDHAplvbJlIHIQ-AOSg2JbgwpCUlvji5wLw8E8alWc2q3En5cznwtbpt1wfijC3Cft71Jq_2rIf3VaWlH3kzl0YZwtRFY0-KWx190BM0-LY1oCAa0BWAO1QCJQPcOtA84gPwUzpXJWoVmSgAqhrSTFMm6d3sPA8ohbR_-JIMJHBcJ-8vbnxK7syf7C-oTx1TdtUhMwIHtPoVpoR8IgAn2MAAyCH4aiql-BtDrrMs_HWSfgNokNjTuLkpeKSuweEeEWZt-3Fm00)
@@ -47,7 +47,7 @@
 ### Скомпрометированный модуль обработки сетевых подключений:
 
 | компрометирующее действие | нарушенные цб |
-|-|-|
+|----------|----------|
 | ложные данные входящего запроса | 1, 2, 3, 4 |
 
 ![5](https://cdn-0.plantuml.com/plantuml/png/VPIzZjfG48LxFyLeKsyam-By5D4-Gzfi2XGea8A50kanX204Yaka595IfJKE1WTiU8MPDygvzt9bV9LGMTuzyvsPSomUXwFsfz7d_aTlW6VlGs_G3aTqvpydBlZ4MvdoKLR41xoKCf4ndaU9wIdaFISa4Tut4ic4KywuX6R91V6ES_o_lFgJVEKSb2FqnHsrXzJtgUxPS3pXbV26Jt1TmayYmbi6x8dFd4XamJCjB3a7F9S5PzQWKUSttPjsCiLeYM4CwijI0vBO09frm8Exu1ndPsQ0UCk9ELPcJw4Dx0ks-grj4Xr0Ri0Fpkaja95ZTJ764tqpPzeZLLZYit9NASetcHjh_cEGBNhsjjkfOmDWqHAVPGhIWJXtYrnPap5kptMRgU45deU6xjyWHdfDFaW_zOfBcPXxgugtc8_rcW1oYVqZ9I8FemhG1A1X01gniA5P1oLGxQprhcC5-6-07jHsArN8Bzi1PpTcgaLKrD__9PFOedt8WbioitKBiXStP13SlrEblB-8NqBymsrPbwg3sviFq0Qf6WDdXWghM9Ia3WukuFLLpswZ7bJrYLTgR-TBK3xrqOGBXFVO3JluWVWB)
@@ -55,7 +55,7 @@
 ### Скомпрометированный модуль запуска и контроля сервисов:
 
 | компрометирующее действие | нарушенные цб |
-|-|-|
+|----------|----------|
 | неправильное управление запуском и контролем сервисов | 1, 2, 3, 4 |
 
 ![6](https://cdn-0.plantuml.com/plantuml/png/VPG_RnD14CNx-nIZK0V9Tcp-52YVWPPGM2H59695nFG-Xn15Zd29H854HRinljmI--AlyEORyMPNgvDNn9MrqPlVctdlbCEByV3J-FFPn-ASlwSVJi-7ex7iTPuBrdZ4KY-nqbl10n-DJdN2tvNEvMY46awqvFjEIvrYWGeDDJEi1VVmgFbi_wHVuKbPKR_Ua-65d7LasxERUTBBuGwFT9tHJqlXgq9DoGPEomI-2i86dd2lDwYIGNURtyjlkjTBZZPmOT0kMqIGpYEWjmquo1UyvjbL710iuUAnUdKqIe5zWSUVOED203w23xBJ-oGpn_PYZhjmCwhWiJ2iO6Fkbg9-q-jeZRyHsS-G0oBP43PqB_4Wy7c9jybWmhjzQ78HMGDvzlRak2XOqVuRvYYlnJw8Ns77cKxZmMt7IqBcjgTHqV20qaHISDG0FGAw4H0GDocrv602g-TxM7XYW2SJBAXEMraZlrC9g7RCj8jOrZ_-9zDvGdSe6-oInQtxbBtO8QCWoLvIzZClEFPfaTNnsqiHMc7mLdZT1cAIX1n49FDg2ywhBAZQVsT5leyJyifspJu1SzWUTLWpiCEJqJ7_A_m3)
