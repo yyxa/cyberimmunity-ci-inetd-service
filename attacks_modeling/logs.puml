@@ -1,0 +1,57 @@
+@startuml
+
+autonumber
+
+participant "1. logs" as m2 #red
+participant "2. fact_checker" as m1
+participant "3. network_in" as m3
+participant "4. request_checker" as m4
+participant "5. config" as m5
+participant "6. condition_checker" as m6
+participant "7. service_starter" as m7
+participant "8. service_killer" as m8
+participant "9. crit_starter" as m9
+participant "10. daemons" as m10
+
+group Инициализация
+    m3 -> m5: Чтение конфига
+    m5 -> m3: Конфиг
+    m3 -> m2: [log]Считал конфиг
+    m2 -[#red]> m1: Подмена [log]
+    m4 -> m5: Чтение конфига
+    m5 -> m4: Конфиг
+    m4 -> m2: [log]Считал конфиг
+    m2 -[#red]> m1: Подмена [log]
+    m6 -> m5: Чтение конфига
+    m5 -> m6: Конфиг
+    m6 -> m2: [log]Считал конфиг
+    m2 -[#red]> m1: Подмена [log]
+    m1 -> m5: Чтение конфига
+    m5 -[#green]> m1: Конфиг
+    m1 -[#green]> m1: Проверка \nсоответствия
+    m1 -> m2: [log]Проверка \nпрошла неуспешно
+end
+
+group Основная работа ci-inetd сервиса
+    m3 -> m2: [log]Запрос на порт X
+    m2 -[#red]> m1: Подмена [log]
+    m3 -> m4: Запрос на порт X
+    m3 -> m6: Запрос на порт X
+    m4 -> m4: Проверка запроса на \nсоответствие конфигурации
+    m4 -> m2: [log]Результат проверки
+    m2 -[#red]> m1: Подмена [log]
+    m6 -> m6: Ожидание EntityId \nдемона
+    m4 -> m7: Запрос на старт сервиса
+    m4 -> m2: [log]Отправил запрос на старт сервиса
+    m2 -[#red]> m1: Подмена [log]
+    m7 -> m10: Запуск демона
+    m7 -> m2: [log]Запустил сервис
+    m2 -[#red]> m1: Подмена [log]
+    m7 -> m6: Передача EntityId \nдемона
+    m6 -> m2: [log]{EntityId} запущен 
+    m2 -[#red]> m1: Подмена [log]
+    m1 -> m1: Проверка \nсоответствия
+    m1 -> m2: [log]Проверка \nпрошла успешно
+    m6 -> m6: Проверка каждые n секунд \nживы ли процессы \nпо EntityIds и портам
+end
+@enduml
