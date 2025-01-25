@@ -1,0 +1,327 @@
+x-common-service: &common-service
+  entrypoint:
+    - bash
+    - -c
+    - |
+      echo 'Giving Kafka a bit of time to start up…'
+      sleep 20
+      venv/bin/python start.py /shared/config.ini
+  volumes:
+    - ./ci-inetd/shared:/shared
+  networks:
+    - ci-inetd-network
+
+services:
+  # ci-arch-ui:
+  #   build: ./ci-arch-ui
+  #   image: ci-arch-ui
+  #   container_name: ci-arch-ui
+  #   ports:
+  #     - "5000:5000"
+  #   networks:
+  #     - ci-inetd-network
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.2.0
+    container_name: zookeeper
+    environment:
+      - ZOOKEEPER_CLIENT_PORT=2181
+      - ZOOKEEPER_TICK_TIME=2000
+    ports:
+     - "2181:2181"
+    networks:
+      - ci-inetd-network
+
+  broker:
+    image: confluentinc/cp-kafka:7.2.0
+    container_name: broker
+    ports:
+      - "9092:9092"
+    expose:
+     - "29092"
+    depends_on:
+      - zookeeper
+    env_file: ./ci-inetd/modules/broker/config/.env
+    networks:
+      - ci-inetd-network
+
+  daemons-service:
+    build: ./daemons-service/
+    image: daemons-service
+    entrypoint: 
+        venv/bin/python start.py
+    container_name: daemons-service
+    environment:
+      - MODULE_NAME=daemons-service
+    ports:
+      - 8000:8000
+    networks:
+      - ci-inetd-network
+
+  ci-inetd-monitor:
+    <<: *common-service
+    build: ./ci-inetd/modules/ci-inetd-monitor
+    image: ci-inetd-monitor
+    container_name: ci-inetd-monitor
+    environment:
+      - MODULE_NAME=ci-inetd-monitor
+
+  # ci-inetd-PortListener:
+  #   <<: *common-service
+  #   build: ./ci-inetd/modules/ci-inetd-PortListener
+  #   image: ci-inetd-PortListener
+  #   container_name: ci-inetd-PortListener
+  #   environment:
+  #     - MODULE_NAME=ci-inetd-PortListener
+  #     - MODULE_PORT=8002
+  #   ports:
+  #     - "8002:8002"
+
+  # ci-inetd-RequestForwarder:
+  #   <<: *common-service
+  #   build: ./ci-inetd/modules/ci-inetd-RequestForwarder
+  #   image: ci-inetd-RequestForwarder
+  #   container_name: ci-inetd-RequestForwarder
+  #   environment:
+  #     - MODULE_NAME=ci-inetd-RequestForwarder
+  #     - MODULE_PORT=8003
+  #   volumes:
+  #     - ./ci-inetd/shared:/shared
+  #   ports:
+  #     - "8003:8003"
+
+  ci-inetd-ConfigFile:
+    <<: *common-service
+    build: ./ci-inetd/modules/ci-inetd-ConfigFile
+    image: ci-inetd-config_file
+    container_name: ci-inetd-ConfigFile
+    environment:
+      - MODULE_NAME=ci-inetd-ConfigFile
+      - MODULE_PORT=8004
+    volumes:
+      - ./ci-inetd/shared:/shared
+    ports:
+      - "8004:8004"
+
+  ci-inetd-ConfigParser:
+    <<: *common-service
+    build: ./ci-inetd/modules/ci-inetd-ConfigParser
+    image: ci-inetd-config_parser
+    container_name: ci-inetd-ConfigParser
+    environment:
+      - MODULE_NAME=ci-inetd-ConfigParser
+      - MODULE_PORT=8005
+    volumes:
+      - ./ci-inetd/shared:/shared
+    ports:
+      - "8005:8005"
+
+  # ci-inetd-RequestVerifier:
+  #   <<: *common-service
+  #   build: ./ci-inetd/modules/ci-inetd-RequestVerifier
+  #   image: ci-inetd-RequestVerifier
+  #   container_name: ci-inetd-RequestVerifier
+  #   environment:
+  #     - MODULE_NAME=ci-inetd-RequestVerifier
+  #     - MODULE_PORT=8006
+  #   volumes:
+  #     - ./ci-inetd/shared:/shared
+  #   ports:
+  #     - "8006:8006"
+
+  # ci-inetd-LogAnalyzer:
+  #   <<: *common-service
+  #   build: ./ci-inetd/modules/ci-inetd-LogAnalyzer
+  #   image: ci-inetd-LogAnalyzer
+  #   container_name: ci-inetd-LogAnalyzer
+  #   environment:
+  #     - MODULE_NAME=ci-inetd-LogAnalyzer
+  #     - MODULE_PORT=8007
+  #   volumes:
+  #     - ./ci-inetd/shared:/shared
+  #   ports:
+  #     - "8007:8007"
+
+  # ci-inetd-PermissionExecutor:
+  #   <<: *common-service
+  #   build: ./ci-inetd/modules/ci-inetd-PermissionExecutor
+  #   image: ci-inetd-PermissionExecutor
+  #   container_name: ci-inetd-PermissionExecutor
+  #   environment:
+  #     - MODULE_NAME=ci-inetd-PermissionExecutor
+  #     - MODULE_PORT=8008
+  #   volumes:
+  #     - ./ci-inetd/shared:/shared
+  #   ports:
+  #     - "8008:8008"
+
+  # ci-inetd-Executor:
+  #   <<: *common-service
+  #   build: ./ci-inetd/modules/ci-inetd-Executor
+  #   image: ci-inetd-Executor
+  #   container_name: ci-inetd-Executor
+  #   environment:
+  #     - MODULE_NAME=ci-inetd-Executor
+  #     - MODULE_PORT=8009
+  #   volumes:
+  #     - ./ci-inetd/shared:/shared
+  #   ports:
+  #     - "8009:8009"
+
+  # ci-inetd-ExecutorEntitySender:
+  #   <<: *common-service
+  #   build: ./ci-inetd/modules/ci-inetd-ExecutorEntitySender
+  #   image: ci-inetd-ExecutorEntitySender
+  #   container_name: ci-inetd-ExecutorEntitySender
+  #   environment:
+  #     - MODULE_NAME=ci-inetd-ExecutorEntitySender
+  #     - MODULE_PORT=8010
+  #   volumes:
+  #     - ./ci-inetd/shared:/shared
+  #   ports:
+  #     - "8010:8010"
+
+  # ci-inetd-ActionManager:
+  #   <<: *common-service
+  #   build: ./ci-inetd/modules/ci-inetd-ActionManager
+  #   image: ci-inetd-ActionManager
+  #   container_name: ci-inetd-ActionManager
+  #   environment:
+  #     - MODULE_NAME=ci-inetd-ActionManager
+  #     - MODULE_PORT=8011
+  #   volumes:
+  #     - ./ci-inetd/shared:/shared
+  #   ports:
+  #     - "8011:8011"
+
+  # ci-inetd-StatusManager:
+  #   <<: *common-service
+  #   build: ./ci-inetd/modules/ci-inetd-StatusManager
+  #   image: ci-inetd-StatusManager
+  #   container_name: ci-inetd-StatusManager
+  #   environment:
+  #     - MODULE_NAME=ci-inetd-StatusManager
+  #     - MODULE_PORT=8012
+  #   volumes:
+  #     - ./ci-inetd/shared:/shared
+  #   ports:
+  #     - "8012:8012"
+
+  # ci-inetd-IdStatus:
+  #   <<: *common-service
+  #   build: ./ci-inetd/modules/ci-inetd-IdStatus
+  #   image: ci-inetd-IdStatus
+  #   container_name: ci-inetd-IdStatus
+  #   environment:
+  #     - MODULE_NAME=ci-inetd-IdStatus
+  #     - MODULE_PORT=8013
+  #   volumes:
+  #     - ./ci-inetd/shared:/shared
+  #   ports:
+  #     - "8013:8013"
+
+  # ci-inetd-PortStatus:
+  #   <<: *common-service
+  #   build: ./ci-inetd/modules/ci-inetd-PortStatus
+  #   image: ci-inetd-PortStatus
+  #   container_name: ci-inetd-PortStatus
+  #   environment:
+  #     - MODULE_NAME=ci-inetd-PortStatus
+  #     - MODULE_PORT=8014
+  #   volumes:
+  #     - ./ci-inetd/shared:/shared
+  #   ports:
+  #     - "8014:8014"
+
+  # ci-inetd-CriticalEntitySender:
+  #   <<: *common-service
+  #   build: ./ci-inetd/modules/ci-inetd-CriticalEntitySender
+  #   image: ci-inetd-CriticalEntitySender
+  #   container_name: ci-inetd-CriticalEntitySender
+  #   environment:
+  #     - MODULE_NAME=ci-inetd-CriticalEntitySender
+  #     - MODULE_PORT=8015
+  #   volumes:
+  #     - ./ci-inetd/shared:/shared
+  #   ports:
+  #     - "8015:8015"
+
+  # ci-inetd-CriticalExecutor:
+  #   <<: *common-service
+  #   build: ./ci-inetd/modules/ci-inetd-CriticalExecutor
+  #   image: ci-inetd-CriticalExecutor
+  #   container_name: ci-inetd-CriticalExecutor
+  #   environment:
+  #     - MODULE_NAME=ci-inetd-CriticalExecutor
+  #     - MODULE_PORT=8016
+  #   volumes:
+  #     - ./ci-inetd/shared:/shared
+  #   ports:
+  #     - "8016:8016"
+
+  # ci-inetd-PermissionTerminator:
+  #   <<: *common-service
+  #   build: ./ci-inetd/modules/ci-inetd-PermissionTerminator
+  #   image: ci-inetd-PermissionTerminator
+  #   container_name: ci-inetd-PermissionTerminator
+  #   environment:
+  #     - MODULE_NAME=ci-inetd-PermissionTerminator
+  #     - MODULE_PORT=8017
+  #   volumes:
+  #     - ./ci-inetd/shared:/shared
+  #   ports:
+  #     - "8017:8017"
+
+  # ci-inetd-Terminator:
+  #   <<: *common-service
+  #   build: ./ci-inetd/modules/ci-inetd-Terminator
+  #   image: ci-inetd-Terminator
+  #   container_name: ci-inetd-Terminator
+  #   environment:
+  #     - MODULE_NAME=ci-inetd-Terminator
+  #     - MODULE_PORT=8018
+  #   volumes:
+  #     - ./ci-inetd/shared:/shared
+  #   ports:
+  #     - "8018:8018"
+
+  # ci-inetd-LogReceiver:
+  #   <<: *common-service
+  #   build: ./ci-inetd/modules/ci-inetd-LogReceiver
+  #   image: ci-inetd-LogReceiver
+  #   container_name: ci-inetd-LogReceiver
+  #   environment:
+  #     - MODULE_NAME=ci-inetd-LogReceiver
+  #     - MODULE_PORT=8019
+  #   volumes:
+  #     - ./ci-inetd/shared:/shared
+  #   ports:
+  #     - "8019:8019"
+
+  # ci-inetd-LogForwarder:
+  #   <<: *common-service
+  #   build: ./ci-inetd/modules/ci-inetd-LogForwarder
+  #   image: ci-inetd-LogForwarder
+  #   container_name: ci-inetd-LogForwarder
+  #   environment:
+  #     - MODULE_NAME=ci-inetd-LogForwarder
+  #     - MODULE_PORT=8020
+  #   volumes:
+  #     - ./ci-inetd/shared:/shared
+  #   ports:
+  #     - "8020:8020"
+
+  # ci-inetd-LogStorage:
+  #   <<: *common-service
+  #   build: ./ci-inetd/modules/ci-inetd-LogStorage
+  #   image: ci-inetd-LogStorage
+  #   container_name: ci-inetd-LogStorage
+  #   environment:
+  #     - MODULE_NAME=ci-inetd-LogStorage
+  #     - MODULE_PORT=8021
+  #   ports:
+  #     - "8021:8021"
+
+networks:
+  ci-inetd-network:
+    driver: bridge
