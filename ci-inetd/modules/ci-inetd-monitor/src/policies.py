@@ -1,97 +1,92 @@
 # Политики безопасности
 policies = (
     # dst daemons
-    {"src": "ci-inetd-Executor", "dst": "daemons"},
-    {"src": "ci-inetd-IdStatus", "dst": "daemons"},
-    {"src": "ci-inetd-PortStatus", "dst": "daemons"},
-    {"src": "ci-inetd-CriticalExecutor", "dst": "daemons"},
-    {"src": "ci-inetd-Terminator", "dst": "daemons"},
+    {"src": "ci-inetd-executor", "dst": "daemons"},
+    {"src": "ci-inetd-id_status", "dst": "daemons"},
+    {"src": "ci-inetd-port_status", "dst": "daemons"},
+    {"src": "ci-inetd-critical_executor", "dst": "daemons"},
+    {"src": "ci-inetd-terminator", "dst": "daemons"},
     
-    # dst ci-inetd-PortListener
-    {"src": "user", "dst": "ci-inetd-PortListener"},
-    {"src": "ci-inetd-ConfigParser", "dst": "ci-inetd-PortListener"},
+    # dst ci-inetd-port_listener
+    {"src": "ci-inetd-config_parser", "dst": "ci-inetd-port_listener"}, # , "cmd": "config_from_file"
 
-    # dst ci-inetd-RequestForwarder
-    {"src": "ci-inetd-PortListener", "dst": "ci-inetd-RequestForwarder"},
+    # dst ci-inetd-request_forwarder
+    {"src": "ci-inetd-port_listener", "dst": "ci-inetd-request_forwarder"},
+    
+    # dst ci-inetd-config_parser
+    {"src": "ci-inetd-port_listener", "dst": "ci-inetd-config_parser"}, # , "cmd": "get_config_from_file"
+    {"src": "ci-inetd-request_verifier", "dst": "ci-inetd-config_parser"}, # , "cmd": "get_config_from_file"
+    {"src": "ci-inetd-log_analyzer", "dst": "ci-inetd-config_parser"}, # , "cmd": "get_config_from_file"
+    {"src": "ci-inetd-status_manager", "dst": "ci-inetd-config_parser"}, # , "cmd": "get_config_from_file"
+    
+    # dst ci-inetd-request_verifier
+    {"src": "ci-inetd-request_forwarder", "dst": "ci-inetd-request_verifier"},
+    {"src": "ci-inetd-config_parser", "dst": "ci-inetd-request_verifier"},
+    
+    # dst ci-inetd-log_analyzer
+    {"src": "ci-inetd-config_parser", "dst": "ci-inetd-log_analyzer"},
+    {"src": "ci-inetd-log_forwarder", "dst": "ci-inetd-log_analyzer"},
 
-    # dst ci-inetd-ConfigFile
-    {"src": "ci-inetd-ConfigParser", "dst": "ci-inetd-ConfigFile"}, # , "cmd": "config_from_file"
+    # dst ci-inetd-permission_executor
+    {"src": "ci-inetd-request_verifier", "dst": "ci-inetd-permission_executor"},
+    {"src": "ci-inetd-action_manager", "dst": "ci-inetd-permission_executor"},
+    {"src": "ci-inetd-status_manager", "dst": "ci-inetd-permission_executor"},
     
-    # dst ci-inetd-ConfigParser
-    {"src": "ci-inetd-ConfigFile", "dst": "ci-inetd-ConfigParser"}, # , "cmd": "get_config_from_file"
-    {"src": "ci-inetd-PortListener", "dst": "ci-inetd-ConfigParser"},
-    {"src": "ci-inetd-RequestVerifier", "dst": "ci-inetd-ConfigParser"},
-    {"src": "ci-inetd-LogAnalyzer", "dst": "ci-inetd-ConfigParser"},
-    {"src": "ci-inetd-StatusManager", "dst": "ci-inetd-ConfigParser"},
+    # dst ci-inetd-permission_executor
+    {"src": "ci-inetd-request_verifier", "dst": "ci-inetd-permission_executor"},
+    {"src": "ci-inetd-action_manager", "dst": "ci-inetd-permission_executor"},
+    {"src": "ci-inetd-status_manager", "dst": "ci-inetd-permission_executor"},
     
-    # dst ci-inetd-RequestVerifier
-    {"src": "ci-inetd-RequestForwarder", "dst": "ci-inetd-RequestVerifier"},
-    {"src": "ci-inetd-ConfigParser", "dst": "ci-inetd-RequestVerifier"},
+    # dst ci-inetd-executor
+    {"src": "ci-inetd-permission_executor", "dst": "ci-inetd-executor"},
     
-    # dst ci-inetd-LogAnalyzer
-    {"src": "ci-inetd-ConfigParser", "dst": "ci-inetd-LogAnalyzer"},
-    {"src": "ci-inetd-LogForwarder", "dst": "ci-inetd-LogAnalyzer"},
+    # dst ci-inetd-executor_entity_sender
+    {"src": "ci-inetd-executor", "dst": "ci-inetd-executor_entity_sender"},
+    
+    # dst ci-inetd-action_manager
+    {"src": "ci-inetd-config_parser", "dst": "ci-inetd-action_manager"},
+    
+    # dst ci-inetd-status_manager
+    {"src": "ci-inetd-config_parser", "dst": "ci-inetd-status_manager"},
+    {"src": "ci-inetd-id_status", "dst": "ci-inetd-status_manager"},
+    {"src": "ci-inetd-port_status", "dst": "ci-inetd-status_manager"},
+    
+    # dst ci-inetd-id_status
+    {"src": "ci-inetd-executor_entity_sender", "dst": "ci-inetd-id_status"},
+    {"src": "ci-inetd-critical_entity_sender", "dst": "ci-inetd-id_status"},
 
-    # dst ci-inetd-PermissionExecutor
-    {"src": "ci-inetd-RequestVerifier", "dst": "ci-inetd-PermissionExecutor"},
-    {"src": "ci-inetd-ActionManager", "dst": "ci-inetd-PermissionExecutor"},
-    {"src": "ci-inetd-StatusManager", "dst": "ci-inetd-PermissionExecutor"},
+    # dst ci-inetd-port_status
+    {"src": "ci-inetd-request_forwarder", "dst": "ci-inetd-port_status"},
     
-    # dst ci-inetd-PermissionExecutor
-    {"src": "ci-inetd-RequestVerifier", "dst": "ci-inetd-PermissionExecutor"},
-    {"src": "ci-inetd-ActionManager", "dst": "ci-inetd-PermissionExecutor"},
-    {"src": "ci-inetd-StatusManager", "dst": "ci-inetd-PermissionExecutor"},
+    # dst ci-inetd-critical_entity_sender
+    {"src": "ci-inetd-critical_executor", "dst": "ci-inetd-critical_entity_sender"},
     
-    # dst ci-inetd-Executor
-    {"src": "ci-inetd-PermissionExecutor", "dst": "ci-inetd-Executor"},
+    # dst ci-inetd-critical_executor
+    {"src": "ci-inetd-action_manager", "dst": "ci-inetd-critical_executor"},
     
-    # dst ci-inetd-ExecutorEntitySender
-    {"src": "ci-inetd-Executor", "dst": "ci-inetd-ExecutorEntitySender"},
+    # dst ci-inetd-permission_terminator
+    {"src": "ci-inetd-action_manager", "dst": "ci-inetd-permission_terminator"},
+    {"src": "ci-inetd-status_manager", "dst": "ci-inetd-permission_terminator"},
     
-    # dst ci-inetd-ActionManager
-    {"src": "ci-inetd-ConfigParser", "dst": "ci-inetd-ActionManager"},
+    # dst ci-inetd-terminator
+    {"src": "ci-inetd-permission_terminator", "dst": "ci-inetd-terminator"},
     
-    # dst ci-inetd-StatusManager
-    {"src": "ci-inetd-ConfigParser", "dst": "ci-inetd-StatusManager"},
-    {"src": "ci-inetd-IdStatus", "dst": "ci-inetd-StatusManager"},
-    {"src": "ci-inetd-PortStatus", "dst": "ci-inetd-StatusManager"},
+    # dst ci-inetd-log_receiver
+    {"src": "ci-inetd-port_listener", "dst": "ci-inetd-log_receiver"},
+    {"src": "ci-inetd-request_verifier", "dst": "ci-inetd-log_receiver"},
+    {"src": "ci-inetd-executor", "dst": "ci-inetd-log_receiver"},
+    {"src": "ci-inetd-action_manager", "dst": "ci-inetd-log_receiver"},
+    {"src": "ci-inetd-status_manager", "dst": "ci-inetd-log_receiver"},
+    {"src": "ci-inetd-id_status", "dst": "ci-inetd-log_receiver"},
+    {"src": "ci-inetd-port_status", "dst": "ci-inetd-log_receiver"},
+    {"src": "ci-inetd-critical_executor", "dst": "ci-inetd-log_receiver"},
+    {"src": "ci-inetd-terminator", "dst": "ci-inetd-log_receiver"},
     
-    # dst ci-inetd-IdStatus
-    {"src": "ci-inetd-ExecutorEntitySender", "dst": "ci-inetd-IdStatus"},
-    {"src": "ci-inetd-CriticalEntitySender", "dst": "ci-inetd-IdStatus"},
+    # dst ci-inetd-log_forwarder
+    {"src": "ci-inetd-log_receiver", "dst": "ci-inetd-log_receiver"},
 
-    # dst ci-inetd-PortStatus
-    {"src": "ci-inetd-RequestForwarder", "dst": "ci-inetd-PortStatus"},
-    
-    # dst ci-inetd-CriticalEntitySender
-    {"src": "ci-inetd-CriticalExecutor", "dst": "ci-inetd-CriticalEntitySender"},
-    
-    # dst ci-inetd-CriticalExecutor
-    {"src": "ci-inetd-ActionManager", "dst": "ci-inetd-CriticalExecutor"},
-    
-    # dst ci-inetd-PermissionTerminator
-    {"src": "ci-inetd-ActionManager", "dst": "ci-inetd-PermissionTerminator"},
-    {"src": "ci-inetd-StatusManager", "dst": "ci-inetd-PermissionTerminator"},
-    
-    # dst ci-inetd-Terminator
-    {"src": "ci-inetd-PermissionTerminator", "dst": "ci-inetd-Terminator"},
-    
-    # dst ci-inetd-LogReceiver
-    {"src": "ci-inetd-PortListener", "dst": "ci-inetd-LogReceiver"},
-    {"src": "ci-inetd-RequestVerifier", "dst": "ci-inetd-LogReceiver"},
-    {"src": "ci-inetd-Executor", "dst": "ci-inetd-LogReceiver"},
-    {"src": "ci-inetd-ActionManager", "dst": "ci-inetd-LogReceiver"},
-    {"src": "ci-inetd-StatusManager", "dst": "ci-inetd-LogReceiver"},
-    {"src": "ci-inetd-IdStatus", "dst": "ci-inetd-LogReceiver"},
-    {"src": "ci-inetd-PortStatus", "dst": "ci-inetd-LogReceiver"},
-    {"src": "ci-inetd-CriticalExecutor", "dst": "ci-inetd-LogReceiver"},
-    {"src": "ci-inetd-Terminator", "dst": "ci-inetd-LogReceiver"},
-    
-    # dst ci-inetd-LogForwarder
-    {"src": "ci-inetd-LogReceiver", "dst": "ci-inetd-LogReceiver"},
-
-    # dst ci-inted-LogStorage
-    {"src": "ci-inetd-LogReceiver", "dst": "ci-inted-LogStorage"},
+    # dst ci-inted-log_storage
+    {"src": "ci-inetd-log_receiver", "dst": "ci-inted-log_storage"},
     
 )
     

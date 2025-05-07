@@ -1,3 +1,4 @@
 tests
 ci-arch-ui
 .venv
+shell.nix

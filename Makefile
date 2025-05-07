@@ -2,26 +2,24 @@ SHELL := bash
 
 MODULES := daemons-service \
 			ci-inetd-monitor \
-			ci-inetd-PortListener \
-			ci-inetd-RequestForwarder \
-			ci-inetd-ConfigFile \
-			ci-inetd-ConfigParser \
-			ci-inetd-RequestVerifier \
-			ci-inetd-LogAnalyzer \
-			ci-inetd-PermissionExecutor \
-			ci-inetd-Executor \
-			ci-inetd-ExecutorEntitySender \
-			ci-inetd-ActionManager \
-			ci-inetd-StatusManager \
-			ci-inetd-IdStatus \
-			ci-inetd-PortStatus \
-			ci-inetd-CriticalEntitySender \
-			ci-inetd-CriticalExecutor \
-			ci-inetd-PermissionTerminator \
-			ci-inetd-Terminator \
-			ci-inetd-LogReceiver \
-			ci-inetd-LogForwarder \
-			ci-inted-LogStorage \
+			ci-inetd-port_listener \
+			ci-inetd-request_forwarder \
+			ci-inetd-config_parser \
+			ci-inetd-request_verifier \
+			ci-inetd-log_analyzer \
+			ci-inetd-permission_executor \
+			ci-inetd-executor \
+			ci-inetd-executor_entity_sender \
+			ci-inetd-action_manager \
+			ci-inetd-status_manager \
+			ci-inetd-id_status \
+			ci-inetd-port_status \
+			ci-inetd-critical_entity_sender \
+			ci-inetd-critical_executor \
+			ci-inetd-permission_terminator \
+			ci-inetd-terminator \
+			ci-inetd-log_receiver \
+			ci-inetd-log_forwarder
 
 
 SLEEP_TIME := 10
@@ -97,3 +95,9 @@ clean:
 .PHONY: check_venv
 check_venv:
 	@[ -d ".venv" ] || (echo "Virtual environment not found. Run 'make dev_install' first."; exit 1)
+
+# make start_port PORT=8080
+.PHONY: start_port
+start_port:
+	@echo "Sending start request for port $(PORT)"
+	curl -X POST http://localhost:8003/ci-inetd/start/$(PORT)
