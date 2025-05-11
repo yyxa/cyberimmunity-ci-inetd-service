@@ -53,8 +53,9 @@ services:
     container_name: daemons-service
     environment:
       - MODULE_NAME=daemons-service
+      - MODULE_PORT=8002
     ports:
-      - 8000:8000
+      - 8002:8002
     networks:
       - ci-inetd-network
 

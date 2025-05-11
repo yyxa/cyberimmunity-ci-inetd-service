@@ -54,8 +54,10 @@ def handle_event(id, details_str):
           f"{source}->{deliver_to}: {operation}")
 
     if operation == "log":
-        write_to_log_storage(details)
-        send_to_log_forwarder(details)
+        details_storage = details.copy()
+        details_log = details.copy()
+        write_to_log_storage(details_storage)
+        send_to_log_forwarder(details_log)
     
     return
 

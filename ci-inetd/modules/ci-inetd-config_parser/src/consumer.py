@@ -2,6 +2,7 @@ import os
 import json
 import threading
 
+import time
 from uuid import uuid4
 import uuid
 from confluent_kafka import Consumer, OFFSET_BEGINNING
@@ -80,12 +81,17 @@ def send_to_status_manager(details):
     proceed_to_deliver(details)
 
 def init_log():
+    time.sleep(30)
     details = prepare_config({})
     
-    send_to_log_analyzer(details)
-    send_to_port_listener(details)
-    send_to_request_verifier(details)
-    send_to_status_manager(details)
+    details_log = details.copy()
+    details_port = details.copy()
+    details_request = details.copy()
+    details_status = details.copy()
+    send_to_log_analyzer(details_log)
+    send_to_port_listener(details_port)
+    send_to_request_verifier(details_request)
+    send_to_status_manager(details_status)
     
 def handle_event(id, details_str):
     details = json.loads(details_str)

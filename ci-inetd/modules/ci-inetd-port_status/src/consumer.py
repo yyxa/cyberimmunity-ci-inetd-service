@@ -1,36 +1,92 @@
 import os
 import json
 import threading
-
+import requests
 from uuid import uuid4
 import uuid
 from confluent_kafka import Consumer, OFFSET_BEGINNING
 
 from .producer import proceed_to_deliver
+import time
 
+DAEMONS_SERVICE_URL = f"http://daemons-service:8002"
 
 MODULE_NAME: str = os.getenv("MODULE_NAME")
+PORTS = {}
 
-
-def validate(details):
-    # функционал валидации скорости
+def send_to_status_manager(details):
+    details["operation"] = "ports_status"
+    details["deliver_to"] = "ci-inetd-status_manager"
+    details["id"] = uuid4().__str__()
     
-    send_to_car_control(details)
+    details_log = details.copy()
+    send_log(details_log)
+    proceed_to_deliver(details)
 
+def send_log(details):
+    new_details = {}
+    new_details["data"] = details
+    new_details["deliver_to"] = "ci-inetd-log_receiver"
+    new_details["operation"] = "log"
+    new_details["id"] = uuid4().__str__()
+        
+    proceed_to_deliver(new_details)
+    
+def add_new_port(details):
+    port = details["data"]["port"]
+    if port not in PORTS:
+        PORTS[port] = {
+            "port": port,
+            "status": "unknown",
+            "last_checked": None
+        }
+        print(f"Added new port {port} to monitoring")
+    else:
+        print(f"Port {port} already exists in monitoring")
 
-def send_to_speed_lower(details):
-    details["operation"] = "stop"
-    details["deliver_to"] = "car-speed-lower"
-    proceed_to_deliver(str(uuid.uuid4()), details)
+def check_ports():
+    results = {}
+    
+    for port in list(PORTS.keys()):
+        try:
+            response = requests.get(
+                f"{DAEMONS_SERVICE_URL}/daemons/process/port/{port}",
+                timeout=3
+            )
+            
+            if response.status_code == 200:
+                status_data = response.json()
+                PORTS[port] = status_data
+                results[port] = {
+                    "status": status_data.get("status", "unknown"),
+                    "service": status_data
+                }
+            else:
+                results[port] = {
+                    "status": "not_found",
+                    "error": response.json().get("error", "Unknown error")
+                }
 
-def send_to_car_control(details):
-    details["operation"] = "speed_data"
-    details["deliver_to"] = "car-control"
-    proceed_to_deliver(str(uuid.uuid4()), details)
+        except requests.exceptions.RequestException as e:
+            results[port] = {
+                "status": "unreachable",
+                "error": str(e)
+            }
+            PORTS[port]["status"] = "unreachable"
+        
+        PORTS[port]["last_checked"] = time.time()
+    
+    details = {}
+    details["data"] = results
+    
+    send_to_status_manager(details)
 
-
+def periodic_check():
+    while True:
+        time.sleep(60)
+        check_ports()
+        
 def handle_event(id, details_str):
-    """ Обработчик входящих в модуль задач. """
     details = json.loads(details_str)
 
     source: str = details.get("source")
@@ -41,14 +97,13 @@ def handle_event(id, details_str):
     print(f"[info] handling event {id}, "
           f"{source}->{deliver_to}: {operation}")
 
-    if operation == "speed_from_adas":
-        return validate(details)
-    elif operation == "speed_from_camera":
-        return validate(details)
-    elif operation == "speed_from_sensors":
-        return validate(details)
-    elif operation == "speed_from_geo":
-        return validate(details)
+    if operation == "new_port":
+        details_log = details.copy()
+        details_port = details.copy()
+        send_log(details_log)
+        add_new_port(details_port)
+    
+    return
 
 
 def consumer_job(args, config):
@@ -89,3 +144,4 @@ def consumer_job(args, config):
 def start_consumer(args, config):
     print(f'{MODULE_NAME}_consumer started')
     threading.Thread(target=lambda: consumer_job(args, config)).start()
+    threading.Thread(target=periodic_check, daemon=True).start()

@@ -26,7 +26,8 @@ def send_to_permission_executor(details):
     details["deliver_to"] = "ci-inetd-permission_executor"
     details["id"] = uuid4().__str__()
     
-    send_log(details)
+    details_log = details.copy()
+    send_log(details_log)
     proceed_to_deliver(details)
 
 def load_config(data):
@@ -43,7 +44,6 @@ def load_config(data):
         print("Failed to load config")
     
 def handle_event(id, details_str):
-    """ Обработчик входящих в модуль задач. """
     details = json.loads(details_str)
 
     source: str = details.get("source")
@@ -67,7 +67,7 @@ def handle_event(id, details_str):
         # port_exists = any(service.get('port') == details["port"] for service in services.values())
         
         for service_name, service_config in services.items():
-            if service_config.get('port') == details["port"]:
+            if service_config.get('port') == details["data"]["port"]:
                 
                 details["data"]["run"] = services[service_name]
                 send_to_permission_executor(details)

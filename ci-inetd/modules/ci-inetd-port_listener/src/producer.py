@@ -9,7 +9,7 @@ _requests_queue: multiprocessing.Queue = None
 MODULE_NAME = os.getenv('MODULE_NAME')
 
 
-def proceed_to_deliver(id, details):
+def proceed_to_deliver(details):
     details['source'] = MODULE_NAME
     _requests_queue.put(details)
 

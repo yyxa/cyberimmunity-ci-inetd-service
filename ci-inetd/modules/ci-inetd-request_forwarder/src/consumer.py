@@ -38,8 +38,11 @@ def handle_event(id, details_str):
           f"{source}->{deliver_to}: {operation}")
 
     if operation == "port_request":
-        send_to_request_verifier(details)
-        send_to_port_status(details)
+        port_details = details.copy()
+        send_to_port_status(port_details)
+        
+        verify_details = details.copy()
+        send_to_request_verifier(verify_details)
 
     return
 

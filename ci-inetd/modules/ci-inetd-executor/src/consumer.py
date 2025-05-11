@@ -19,7 +19,7 @@ def run_process(details):
             print("No service data provided in details")
             return
 
-        api_url = f"http://{os.getenv('DEMON_HOST', 'ci-inetd-port_listener')}:{os.getenv('DEMON_PORT', '8003')}/daemons/start"
+        api_url = f"http://daemons-service:8002/daemons/start"
 
         response = requests.post(
             api_url,
@@ -35,7 +35,8 @@ def run_process(details):
             details["process_info"] = result
             send_to_executor_entity_sender(details)
 
-        send_log(details)
+        details_log = details.copy()
+        send_log(details_log)
         return
 
     except Exception as e:
@@ -52,18 +53,18 @@ def send_log(details):
     new_details["operation"] = "log"
     new_details["id"] = uuid4().__str__()
     
-    proceed_to_deliver(details)
+    proceed_to_deliver(new_details)
 
 def send_to_executor_entity_sender(details):
     details["operation"] = "process_info"
     details["deliver_to"] = "ci-inetd-executor_entity_sender"
     details["id"] = uuid4().__str__()
     
-    send_log(details)
+    details_log = details.copy()
+    send_log(details_log)
     proceed_to_deliver(details)
     
 def handle_event(id, details_str):
-    """ Обработчик входящих в модуль задач. """
     details = json.loads(details_str)
 
     source: str = details.get("source")
@@ -75,8 +76,10 @@ def handle_event(id, details_str):
           f"{source}->{deliver_to}: {operation}")
 
     if operation == "start_app":
-        send_log(details)
-        run_process(details)
+        details_log = details.copy()
+        details_run = details.copy()
+        send_log(details_log)
+        run_process(details_run)
     
     return
 

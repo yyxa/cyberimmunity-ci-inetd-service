@@ -29,7 +29,8 @@ def send_config_request():
         "id": str(uuid4())
     }
     
-    send_to_logs(details)
+    details_log = details.copy()
+    send_to_logs(details_log)
     
     try:
         _requests_queue.put(details)
@@ -58,7 +59,8 @@ def send_to_forwarder(details):
     details["source"] = MODULE_NAME
     details["id"] = uuid4().__str__()
 
-    send_to_logs(details)
+    details_log = details.copy()
+    send_to_logs(details_log)
     
     try:
         _requests_queue.put(details)
@@ -114,10 +116,13 @@ def wait_response():
 def start_process(port):
     details_to_send = {
         "operation": "port_request",
-        "port": port
+        "data": {
+            "port": port
+        }
     }
     
-    send_to_logs(details_to_send)
+    details_log = details_to_send.copy()
+    send_to_logs(details_log)
     
     if not CONFIG:
         return jsonify({"error": "Config not loaded"}), 500
@@ -129,8 +134,9 @@ def start_process(port):
         return jsonify({"error": f"Port {port} not found in config"}), 404
     
     send_to_forwarder(details_to_send)
-    data = wait_response()
-    return jsonify(data)
+    # data = wait_response()
+    # return jsonify(data)
+    return {}
 
 @app.errorhandler(HTTPException)
 def handle_exception(e):

@@ -6,78 +6,84 @@ import threading
 import multiprocessing
 
 from uuid import uuid4
-from flask import Flask, jsonify, abort
+from flask import Flask, jsonify, abort, request
 import requests
 from werkzeug.exceptions import HTTPException
 
 PROCESSES = {}
+PID_COUNTER = 1000
 HOST = '0.0.0.0'
 PORT: int = int(os.getenv("MODULE_PORT"))
 MODULE_NAME: str = os.getenv("MODULE_NAME")
 MAX_WAIT_TIME: int = 30
 app = Flask(__name__)
         
+def generate_pid():
+    global PID_COUNTER
+    PID_COUNTER += 1
+    return PID_COUNTER
+
 @app.route('/daemons/processes', methods=['GET'])
 def list_processes():
-    """Возвращает список всех активных процессов"""
     return jsonify({
         'processes': PROCESSES,
         'count': len(PROCESSES)
     })
 
-@app.route('/daemons/process/<string:process_id>', methods=['GET'])
-def get_process_status(process_id):
-    """Проверяет статус процесса по ID"""
-    if process_id not in PROCESSES:
+@app.route('/daemons/process/pid/<int:pid>', methods=['GET'])
+def get_process_status(pid):
+    if pid not in PROCESSES:
         return jsonify({"error": "Process not found"}), 404
+    return jsonify(PROCESSES[pid])
+
+@app.route('/daemons/process/port/<int:port>', methods=['GET'])
+def get_process_by_port(port):
+    process = next((p for p in PROCESSES.values() if p['port'] == port), None)
     
-    return jsonify(PROCESSES[process_id])
+    if not process:
+        return jsonify({"error": f"Process with port {port} not found"}), 404
+    
+    return jsonify(process)
 
 @app.route('/daemons/start', methods=['POST'])
 def start_process():
-    """Запуск процесса"""
     if not request.is_json:
         return jsonify({"error": "Request must be JSON"}), 400
     
-    service_data = request.get_json()
-    process_id = str(uuid4())
+    data = request.get_json()
     
-    required_fields = ['port', 'user', 'program_path']
-    for field in required_fields:
-        if field not in service_data:
-            return jsonify({"error": f"Missing required field: {field}"}), 400
+    required = ['port', 'user', 'program_path']
+    if any(field not in data for field in required):
+        return jsonify({"error": "Missing required fields"}), 400
     
-    for pid, proc in PROCESSES.items():
-        if proc['port'] == service_data['port']:
-            return jsonify({
-                "error": f"Port {service_data['port']} already in use",
-                "process_id": pid
-            }), 400
+    if any(p['port'] == data['port'] for p in PROCESSES.values()):
+        return jsonify({"error": f"Port {data['port']} already in use"}), 400
     
-    PROCESSES[process_id] = {
-        **service_data,
-        'id': process_id,
+    pid = generate_pid()
+    
+    PROCESSES[pid] = {
+        **data,
+        'pid': pid,
         'start_time': time.time(),
         'status': 'running'
     }
     
     return jsonify({
-        "message": "Process registered",
-        "process_id": process_id,
-        "service": service_data
+        "message": "Process started",
+        "pid": pid,
+        "details": data
     }), 201
 
-@app.route('/daemons/stop/<string:process_id>', methods=['POST'])
-def stop_process(process_id):
-    """Убивает процесс"""
-    if process_id not in PROCESSES:
+@app.route('/daemons/stop/<int:pid>', methods=['POST'])
+def stop_process(pid):
+    if pid not in PROCESSES:
         return jsonify({"error": "Process not found"}), 404
     
-    removed_process = PROCESSES.pop(process_id)
+    removed = PROCESSES.pop(pid)
     return jsonify({
-        "message": "Process removed",
-        "process_id": process_id,
-        "service": removed_process
+        "message": "Process stopped",
+        "pid": pid,
+        "details": removed
     })
 
 @app.errorhandler(HTTPException)
@@ -90,7 +96,6 @@ def handle_exception(e):
 
     
 def start_web():
-    
     threading.Thread(target=lambda: app.run(
         host=HOST, port=PORT, debug=True, use_reloader=False
     )).start()
